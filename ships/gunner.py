@@ -20,7 +20,10 @@ class Gunner(ship.Ship):
         else:
             closest_enemy, distance = self.find_closest(self.ships.enemy_ships)
             if closest_enemy is None:
-                self.idle()
+                if self.controller.moving is not None:
+                    self.follow_mothership()
+                else:
+                    self.idle()
                 return
             if self.facing(closest_enemy):
                 self.shoot()

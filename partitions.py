@@ -20,10 +20,9 @@ class Partition:
     def __repr__(self):
         return 'Part (' + str(self.x) + ',' + str(self.y) + ')'
 
-    def draw(self, window):
-        # pygame.draw.rect(window, (0, 0, 0), pygame.Rect(self.x, self.y, self.size, self.size), 1)
+    def draw(self, window, cam_x, cam_y):
         for agent, pos in self.contained.items():
-            agent.draw(window, pos[0] + self.x, pos[1] + self.y)
+            agent.draw(window, pos[0] + self.x - cam_x, pos[1] + self.y - cam_y)
 
     def contained_near(self):
         new_set = self.contained.copy()
@@ -116,9 +115,6 @@ class Board:
         board_color = (0, 0, 0)
         window.fill(board_color)
         self.draw_stars(window)
-        for arr in self.partitions:
-            for partition in arr:
-                partition.draw(window)
 
     def add(self, addition, x, y):
         if len(self.partitions) <= x / self.partition_size:
@@ -138,7 +134,7 @@ class Board:
     def draw_stars(self, window):
         random.seed(1)
         for n in range(200):  # num stars
-            x = random.randint(0, self.width)
-            y = random.randint(0, self.height)
+            x = random.randint(0, 100 * 16)
+            y = random.randint(0, 100 * 9)
             pygame.draw.circle(window, (237, 237, 232), (x, y), 1)
         random.seed(time.time_ns())

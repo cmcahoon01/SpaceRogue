@@ -13,15 +13,23 @@ class MotherShip(ship.Ship):
         self.speed = 0
 
     def move(self):
-        closest_enemy, distance = self.find_closest(self.ships.enemy_ships)
-        self.health += 0.1
-        if closest_enemy is None:
-            self.idle()
-            return
-        if self.facing(closest_enemy):
-            self.shoot()
+        if self.controller.moving is not None:
+            self.speed = 3
+            target = self.controller.moving
+            if not self.facing(target):
+                self.turn_towards(target)
+            self.forward()
+            self.speed = 0
         else:
-            self.turn_towards(closest_enemy)
+            closest_enemy, distance = self.find_closest(self.ships.enemy_ships)
+            self.health += 0.1
+            if closest_enemy is None:
+                self.idle()
+                return
+            if self.facing(closest_enemy):
+                self.shoot()
+            else:
+                self.turn_towards(closest_enemy)
 
     def shoot(self):
         if self.cool_down == 0:

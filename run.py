@@ -1,13 +1,9 @@
 import pygame
 from pygame.constants import *
 import threading
-import partitions
-from boid import Boid
-from math import pi
-import random
-from ships import mothership, enemyA, gunner, projectile, medic
-from ui import UI
+from ships import mothership
 from space_control import SpaceControl
+import json
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -42,17 +38,34 @@ def event_handler(events, settings, control):
             if event.key == K_q:
                 pygame.quit()
                 settings.game_running = False
+            elif event.key == K_w:
+                control.camera.up = True
+            elif event.key == K_a:
+                control.camera.left = True
+            elif event.key == K_s:
+                control.camera.down = True
+            elif event.key == K_d:
+                control.camera.right = True
+        elif event.type == KEYUP:
+            if event.key == K_w:
+                control.camera.up = False
+            elif event.key == K_a:
+                control.camera.left = False
+            elif event.key == K_s:
+                control.camera.down = False
+            elif event.key == K_d:
+                control.camera.right = False
         elif event.type == pygame.MOUSEBUTTONUP:
             x, y = pygame.mouse.get_pos()
             control.ui.click(x, y)
 
 
 def update_loop(settings, control):
-    control.act()
-    settings.game_time += 1
     time = 1 / settings.ups if settings.display else 0
     thread_update = threading.Timer(time, lambda: update_loop(settings, control))
     thread_update.start()
+    settings.game_time += 1
+    control.act()
 
 
 def run_simulation(settings):
@@ -63,9 +76,10 @@ def run_simulation(settings):
         pygame.init()
         window_pygame = pygame.display.set_mode(settings.dimensions, 0, 32)
         pygame.display.set_caption('Boids')
-    board = partitions.Board(settings.dimensions[0], settings.dimensions[1])
-    space_control = SpaceControl(board, settings)
-    add_ships(space_control)
+    level = 1
+    with open('levels/level_'+str(level)+'.json') as f:
+        level_json = json.load(f)
+    space_control = SpaceControl(settings, level_json)
     clock = pygame.time.Clock()
     thread_update = threading.Timer(1 / settings.ups, lambda: update_loop(settings, space_control))
     thread_update.start()
@@ -76,10 +90,6 @@ def run_simulation(settings):
         if settings.display:
             clock.tick(settings.fps)
     return settings.game_time
-
-
-def add_ships(control):
-    control.add(mothership.MotherShip, 800, 450)
 
 
 if __name__ == "__main__":

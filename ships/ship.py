@@ -67,14 +67,19 @@ class Ship:
         threshold = pi / 100
 
         x, y = self.container.position(self)
-        target_pos = target.container.position(target)
+        target_pos = target
+        if isinstance(target, Ship):
+            target_pos = target.container.position(target)
+
         dy, dx = target_pos[1] - y, target_pos[0] - x
         angle_to_t = self.correct_angle(atan2(dy, dx))
         difference = abs(angle_to_t - self.angle)
         return difference < threshold or difference > 2 * pi - threshold
 
     def turn_towards(self, target, away=1):
-        target_pos = target.container.position(target)
+        target_pos = target
+        if isinstance(target, Ship):
+            target_pos = target.container.position(target)
         x, y = self.container.position(self)
         dy, dx = target_pos[1] - y, target_pos[0] - x
         angle_to_t = atan2(dy, dx)
@@ -133,3 +138,13 @@ class Ship:
         self.forward()
         self.angle -= self.rotation_speed / 40  # spin left
         self.correct_angle()
+
+    def follow_mothership(self):
+        if self.controller.moving is None:
+            return
+        mothership = self.controller.ships.ally_ships[0]
+        if not self.facing(mothership):
+            self.turn_towards(mothership)
+
+        if self.distance_to(mothership) > 30:
+            self.forward()
