@@ -93,4 +93,4 @@ def run_simulation(settings):
 
 
 if __name__ == "__main__":
-    print(run_simulation(GameSettings(60, 60, (3, 3), 90)))
+    print(run_simulation(GameSettings(60, 120, (3, 3), 90)))
